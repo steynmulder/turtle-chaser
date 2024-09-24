@@ -3,7 +3,7 @@ services:
   runner:
     build:
       context: .
-      dockerfile: Dockerfile.runner
+      dockerfile: Dockerfile.command
     container_name: runner
     networks:
       - ros2_net

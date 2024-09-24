@@ -15,4 +15,4 @@ COPY src ./src
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build"
 
 # Source and run the turtle_runner node
-CMD ["bash", "-c", "source /opt/ros/humble/setup.bash && source /turtle_chaser_ws/install/setup.bash && ros2 run turtle_runner turtle_runner"]
+CMD ["bash", "-c", "source /opt/ros/humble/setup.bash && source /turtle_chaser_ws/install/setup.bash && ros2 run turtle_command turtle_runner"]
