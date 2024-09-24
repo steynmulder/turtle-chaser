@@ -1,0 +1,29 @@
+version: '3'
+services:
+  runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.runner
+    container_name: runner
+    networks:
+      - ros2_net
+    environment:
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
+  turtlesim:
+    build:
+      context: .
+      dockerfile: Dockerfile.turtlesim
+    container_name: turtlesim
+    networks:
+      - ros2_net
+    environment:
+      - DISPLAY=${DISPLAY}  # Needed to display the GUI from the turtlesim_node
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix  # Share X11 socket to access display
+    depends_on:
+      - runner  # turtle_runner dependency
+
+networks:
+  ros2_net:
+    driver: bridge

@@ -1,0 +1,9 @@
+FROM ros:humble-ros-base
+
+# install the turtlesim package
+RUN apt-get update && apt-get install -y \
+ros-humble-turtlesim\
+&& rm -rf /var/lib/apt/lists/*
+
+# source and run the turtlesim node
+CMD [ "bash", "-c", "source /opt/ros/humble/setup.bash && ros2 run turtlesim turtlesim_node" ]
