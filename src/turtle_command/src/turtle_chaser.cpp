@@ -7,6 +7,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "turtlesim/msg/pose.hpp"
 #include "turtlesim/srv/spawn.hpp"
+#include "turtlesim/srv/set_pen.hpp"
 #include "turtlesim/srv/teleport_absolute.hpp"
 
 using namespace std::chrono_literals;
@@ -33,8 +34,57 @@ class TurtleChaser : public rclcpp::Node
 
             // client for teleporting runner turtle to a new position once it is tagged
             teleport_client_ = this->create_client<turtlesim::srv::TeleportAbsolute>("turtle1/teleport_absolute");
+
+            // client for spawning chaser turtle upon simulation start
+            spawn_client_ = this->create_client<turtlesim::srv::Spawn>("spawn");
+
+            // client for spawning chaser turtle upon simulation start
+            set_pen_client_ = this->create_client<turtlesim::srv::SetPen>("turtle2/set_pen");
+
+            while (!teleport_client_->wait_for_service(1s))
+            {
+                RCLCPP_WARN(this->get_logger(), "Waiting for teleport service to become available");
+            }
+
+            while (!spawn_client_->wait_for_service(1s))
+            {
+                RCLCPP_WARN(this->get_logger(), "Waiting for spawn service to become available");
+            }
+
         }
 
+        // service client to spawn the chaser turtle
+        void spawn_turtle(float x, float y, const std::string &name) {
+            auto request = std::make_shared<turtlesim::srv::Spawn::Request>();
+            request->x = x;
+            request->y = y;
+            request->name = name;
+
+            auto result_future = spawn_client_->async_send_request(request);
+
+            // only call the set_pen service once the chaser turtle has been created and the service is available
+            while (!set_pen_client_->wait_for_service(1s))
+            {
+                RCLCPP_WARN(this->get_logger(), "Waiting for set_pen service to become available");
+            }
+
+            this->set_pen_turtle(255, 0, 0, 5);
+        }
+
+        // service client to set the color of the chaser turtle's trail
+        void set_pen_turtle(float r, float g, float b, float width)
+        {
+            auto request = std::make_shared<turtlesim::srv::SetPen::Request>();
+            request->r = r;
+            request->g = g;
+            request->b = b;
+            request->width = width;
+
+            auto result_future = set_pen_client_->async_send_request(request);
+
+        }
+
+        // service client to teleport the runner turtle to a new location once it is tagged by the chaser turtle
         void teleport_turtle(float x, float y, float theta)
         {
             auto request = std::make_shared<turtlesim::srv::TeleportAbsolute::Request>();
@@ -52,6 +102,9 @@ class TurtleChaser : public rclcpp::Node
         rclcpp::Subscription<turtlesim::msg::Pose>::SharedPtr self_sub_;
         rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr chase_pub_;
         rclcpp::Client<turtlesim::srv::TeleportAbsolute>::SharedPtr teleport_client_;
+        rclcpp::Client<turtlesim::srv::Spawn>::SharedPtr spawn_client_;
+        rclcpp::Client<turtlesim::srv::SetPen>::SharedPtr set_pen_client_;
+
         rclcpp::TimerBase::SharedPtr timer_;
         size_t count_;
 
@@ -116,7 +169,10 @@ class TurtleChaser : public rclcpp::Node
 int main(int argc, char* argv[])
 {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<TurtleChaser>());
+    auto node = std::make_shared<TurtleChaser>();
+
+    node->spawn_turtle(1.0, 1.0, "turtle2");
+    rclcpp::spin(node);
     rclcpp::shutdown();
     return 0;
 }
