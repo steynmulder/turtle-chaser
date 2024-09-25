@@ -9,6 +9,8 @@ services:
       - ros2_net
     environment:
       - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+    depends_on:
+      - turtlesim  # run after turtlesim
 
   turtlesim:
     build:
@@ -21,8 +23,6 @@ services:
       - DISPLAY=${DISPLAY}  # Needed to display the GUI from the turtlesim_node
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix  # Share X11 socket to access display
-    depends_on:
-      - runner  # turtle_runner dependency
 
 networks:
   ros2_net:

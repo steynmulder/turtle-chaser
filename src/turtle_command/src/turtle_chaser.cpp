@@ -5,6 +5,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "turtlesim/msg/pose.hpp"
+#include "turtlesim/srv/spawn.hpp"
 
 using namespace std::chrono_literals;
 /*
@@ -21,6 +22,7 @@ class TurtleChaser : public rclcpp::Node
             std::bind(&TurtleChaser::topic_callback, this, std::placeholders::_1));
 
             // TODO: spawn a new turtle and make its trail red
+
         }
 
     private:
