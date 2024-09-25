@@ -15,7 +15,7 @@ add_executable(turtle_runner src/turtle_runner.cpp)
 ament_target_dependencies(turtle_runner rclcpp geometry_msgs)
 
 add_executable(turtle_chaser src/turtle_chaser.cpp)
-ament_target_dependencies(turtle_chaser rclcpp turtlesim)
+ament_target_dependencies(turtle_chaser rclcpp turtlesim geometry_msgs)
 
 add_executable(turtle_chaser_spawn src/turtle_chaser_spawn.cpp)
 ament_target_dependencies(turtle_chaser_spawn rclcpp turtlesim)
